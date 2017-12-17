@@ -2,6 +2,10 @@
 
 namespace Tests\GL\Http\Controllers\Home;
 
+use GL\Exceptions\ExceptionCode;
+use GL\Models\BaseStation\ChinaMobile;
+use GL\Models\BaseStation\ChinaTelecom;
+use GL\Models\BaseStation\ChinaUnicom;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\GL\TestCase;
 
@@ -12,36 +16,54 @@ class BaseStationControllerTest extends TestCase
     //=========================================
     //               Location
     //=========================================
-    public function testLocation()
+    public function testLocation_NotExists()
     {
-//        $user = factory(User::class)->create();
-//        /** @var Dealer $dealer */
-//        $dealer = factory(Dealer::class)->create();
-//        factory(Order::class)->create([
-//            'user_id'   => $user->id,
-//            'dealer_id' => $dealer->id,
-//            'status'    => Order::STATUS_FINISH,
-//        ]);
-//
-//        $response = $response = $this->actingAs($user)
-//            ->json('GET', 'api/home_page_data',
-//                [], $this->morphJwtTokenHeader($user));
-//
-//        $this->seeJsonResponseOk($response);
-//        $response->assertJsonStructure([
-//            'data' => [
-//                'title',
-//                'button_status' => [
-//                    'un_finished', 'pending_pay', 'pending_evaluated', 'finished',
-//                ],
-//            ]
-//        ]);
-        $response = $this->getJson('api/base_station/location');
+        factory(ChinaMobile::class)->create();
+        $response = $this->getJson('api/base_station/location?mnc=0&lac=0&cell_id=0');
+        $response->assertSuccessful();
+        $data = json_decode($response->getContent(), true);
+        $this->assertEquals(ExceptionCode::NOT_EXISTS_BASE_STATION, $data['status']);
+    }
+
+    public function testLocation_ChinaMoibleExists()
+    {
+        /** @var ChinaMobile $chinaMobile */
+        $chinaMobile = factory(ChinaMobile::class)->create();
+        $response = $this->getJson(sprintf('api/base_station/location?mnc=%s&lac=%s&cell_id=%s', 0, $chinaMobile->lac, $chinaMobile->cellId));
         $response->assertSuccessful();
         $data = json_decode($response->getContent(), true);
         $this->assertEquals(0, $data['status']);
-//        $this->assertEquals(0, $data['lat']);
-//        $this->assertEquals(0, $data['lon']);
-//        $this->assertEquals(0, $data['address']);
+        $this->assertEquals($chinaMobile->lat, $data['lat']);
+        $this->assertEquals($chinaMobile->lon, $data['lon']);
+        $this->assertEquals($chinaMobile->radius, $data['radius']);
+        $this->assertEquals($chinaMobile->address, $data['address']);
+    }
+
+    public function testLocation_ChinaUnicomExists()
+    {
+        /** @var ChinaUnicom $chinaUnicom */
+        $chinaUnicom = factory(ChinaUnicom::class)->create();
+        $response = $this->getJson(sprintf('api/base_station/location?mnc=%s&lac=%s&cell_id=%s', 1, $chinaUnicom->lac, $chinaUnicom->cellId));
+        $response->assertSuccessful();
+        $data = json_decode($response->getContent(), true);
+        $this->assertEquals(0, $data['status']);
+        $this->assertEquals($chinaUnicom->lat, $data['lat']);
+        $this->assertEquals($chinaUnicom->lon, $data['lon']);
+        $this->assertEquals($chinaUnicom->radius, $data['radius']);
+        $this->assertEquals($chinaUnicom->address, $data['address']);
+    }
+
+    public function testLocation_ChinaTelecomExists()
+    {
+        /** @var ChinaTelecom $chinaTelecom */
+        $chinaTelecom = factory(ChinaTelecom::class)->create();
+        $response = $this->getJson(sprintf('api/base_station/location?mnc=%s&sid=%s&nid=%s&bid=%s', 2, $chinaTelecom->sid, $chinaTelecom->nid, $chinaTelecom->bid));
+        $response->assertSuccessful();
+        $data = json_decode($response->getContent(), true);
+        $this->assertEquals(0, $data['status']);
+        $this->assertEquals($chinaTelecom->lat, $data['lat']);
+        $this->assertEquals($chinaTelecom->lon, $data['lon']);
+        $this->assertEquals($chinaTelecom->radius, $data['radius']);
+        $this->assertEquals($chinaTelecom->address, $data['address']);
     }
 }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateChinaMobilesTable extends Migration
+class CreateChinaTelecomsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,11 @@ class CreateChinaMobilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('china_mobiles', function (Blueprint $table) {
+        Schema::create('china_telecoms', function (Blueprint $table) {
             $table->uuid('id');
-            $table->bigInteger('lac');
-            $table->bigInteger('cell_id');
+            $table->bigInteger('sid');
+            $table->bigInteger('nid');
+            $table->bigInteger('bid');
             $table->double('lat');
             $table->double('lon');
             $table->bigInteger('radius');
@@ -35,6 +36,6 @@ class CreateChinaMobilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('china_mobiles');
+        Schema::dropIfExists('china_telecoms');
     }
 }

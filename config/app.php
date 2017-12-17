@@ -178,6 +178,8 @@ return [
         GL\Providers\EventServiceProvider::class,
         GL\Providers\RouteServiceProvider::class,
 
+        \GL\Providers\BaseStationServiceProvider::class,
+
     ],
 
     /*

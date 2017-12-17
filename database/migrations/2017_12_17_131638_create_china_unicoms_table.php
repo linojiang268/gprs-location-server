@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateChinaMobilesTable extends Migration
+class CreateChinaUnicomsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateChinaMobilesTable extends Migration
      */
     public function up()
     {
-        Schema::create('china_mobiles', function (Blueprint $table) {
+        Schema::create('china_unicoms', function (Blueprint $table) {
             $table->uuid('id');
             $table->bigInteger('lac');
             $table->bigInteger('cell_id');
@@ -35,6 +35,6 @@ class CreateChinaMobilesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('china_mobiles');
+        Schema::dropIfExists('china_unicoms');
     }
 }
