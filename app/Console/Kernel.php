@@ -2,7 +2,7 @@
 
 namespace GL\Console;
 
-use Icar\Console\Commands\ImportBaseStationsCommand;
+use GL\Console\Commands\ImportBaseStationsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 

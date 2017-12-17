@@ -1,5 +1,5 @@
 <?php
-namespace Icar\Console\Commands;
+namespace GL\Console\Commands;
 
 use GL\Models\BaseStation\ChinaMobile;
 use GL\Models\BaseStation\ChinaTelecom;
