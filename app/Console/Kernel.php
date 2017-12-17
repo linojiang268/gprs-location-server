@@ -2,6 +2,7 @@
 
 namespace GL\Console;
 
+use Icar\Console\Commands\ImportBaseStationsCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -13,7 +14,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        ImportBaseStationsCommand::class
     ];
 
     /**
