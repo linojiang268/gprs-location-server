@@ -2,7 +2,7 @@
 
 namespace GL\Http\Controllers;
 
-class WelcomController extends Controller
+class WelcomeController extends Controller
 {
     /**
      * Index page for welcome
