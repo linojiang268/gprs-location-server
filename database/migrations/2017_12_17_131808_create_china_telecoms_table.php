@@ -26,6 +26,7 @@ class CreateChinaTelecomsTable extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+            $table->index(['sid', 'nid', 'bid']);
         });
     }
 

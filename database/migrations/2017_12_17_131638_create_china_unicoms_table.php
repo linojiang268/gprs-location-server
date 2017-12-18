@@ -25,6 +25,7 @@ class CreateChinaUnicomsTable extends Migration
 
             $table->timestamps();
             $table->softDeletes();
+            $table->index(['lac', 'cell_id']);
         });
     }
 
