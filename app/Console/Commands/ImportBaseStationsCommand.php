@@ -116,6 +116,7 @@ class ImportBaseStationsCommand extends Command
                     // $this->echo(sprintf("China mobile, line index: %s.\n", ++$index));
 
                     $pendingCommit++;
+                    $index++;
                     break;
                 case 1:
 //                    if (ChinaUnicom::findBy($lac, $cellId)) {
@@ -133,6 +134,7 @@ class ImportBaseStationsCommand extends Command
                     // $this->echo(sprintf("China unicom, line index: %s.\n", ++$index));
 
                     $pendingCommit++;
+                    $index++;
                     break;
                 default:
 //                    if (ChinaTelecom::findBy($mnc, $lac, $cellId)) {
@@ -150,12 +152,13 @@ class ImportBaseStationsCommand extends Command
                     // $this->echo(sprintf("China telecom, line index: %s.\n", ++$index));
 
                     $pendingCommit++;
+                    $index++;
                     break;
             }
 
             if ($pendingCommit % 1000000 == 0) {
                 DB::commit();
-                $this->echo(sprintf("Base station, line index: %s, %s.\n", ++$index, Carbon::now()->toDateTimeString()));
+                $this->echo(sprintf("Base station, line index: %s, %s.\n", $index, Carbon::now()->toDateTimeString()));
                 $pendingCommit = 0;
             }
 
