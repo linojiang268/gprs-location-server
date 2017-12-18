@@ -1,6 +1,7 @@
 <?php
 namespace GL\Console\Commands;
 
+use Carbon\Carbon;
 use GL\Models\BaseStation\ChinaMobile;
 use GL\Models\BaseStation\ChinaTelecom;
 use GL\Models\BaseStation\ChinaUnicom;
@@ -152,16 +153,16 @@ class ImportBaseStationsCommand extends Command
                     break;
             }
 
-            if ($pendingCommit % 10000 == 0) {
+            if ($pendingCommit % 100000 == 0) {
                 DB::commit();
-                $this->echo(sprintf("Base station, line index: %s.\n", ++$index));
+                $this->echo(sprintf("Base station, line index: %s, %s.\n", ++$index, Carbon::now()->toDateTimeString()));
                 $pendingCommit = 0;
             }
         }
 
         if ($pendingCommit > 0) {
             DB::commit();
-            $this->echo(sprintf("Base station last, line index: %s.\n", $index));
+            $this->echo(sprintf("Base station last, line index: %s, %s.\n", $index, Carbon::now()->toDateTimeString()));
         }
 
         fclose($file);
