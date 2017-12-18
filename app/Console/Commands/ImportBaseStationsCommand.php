@@ -57,46 +57,16 @@ class ImportBaseStationsCommand extends Command
         $pendingCommit = 0;
         // get one line
         while ($data = fgetcsv($file)) {
-            // replace tab
-            $lineStr  = str_replace("\t", "*****", $data[0]);
-            // explode string to array
-            $lineData = explode('*****', $lineStr);
-
-            // $data = [
-            //     0  => "460",         // mcc 所有的都是460,表示中国
-            //     1  => "0",           // mnc 0表示移动基站,1表示联通基站,
-            //                          // 11表示电信LTE基站10000-20000表示电信CDMA基站，此时此字段的取值并非MNC，实际为电信SID
-            //     2  => "33061",       // lac 电信为nid
-            //     3  => "13256",       // cell id 电信为bid
-            //     4  => "30.573833",   // lat
-            //     5  => "104.292610",  // lon
-            //     6  => "175",         // acc 覆盖范围米
-            //     7  => "20171030",    // date
-            //     8  => "0.66",        // 精度   （正常无此字段）
-            //     9  => "四川省成都市龙泉驿区龙泉街道百工堰村;枇杷沟路与公园路路口南812米",  // addr
-            //     10 => "四川省",       // province
-            //     11 => "成都市",       // city
-            //     12 => "龙泉驿区",     // district
-            //     13 => "龙泉街道",     // township
-            // ];
-
-            // remove index of 8 if count is 14, sometimes this field is not exists
-            if (count($lineData) == 14) {
-                unset($lineData[8]);
-                $lineData = array_values($lineData);
-            }
+            $lineData = $this->lineData($data[0]);
 
             // validation
-            if (count($lineData) != 13 || 460 != $lineData[0]) {
-                echo $this->echo(sprintf("Invalid, line index: %s.\n", ++$index));
+            if (!$this->validate($lineData, $index)) {
                 break;
             }
 
-            list($mcc, $mnc, $lac, $cellId,
-                 $lat, $lon, $radius, $dateRefreshAt,
-                 $address, $province, $city, $district, $township)
-                 = $lineData;
-
+            // get fields
+            list($mcc, $mnc, $lac, $cellId, $lat, $lon, $radius, $dateRefreshAt,
+                 $address, $province, $city, $district, $township) = $lineData;
             $dateRefreshAt = CarbonHelper::create($dateRefreshAt);
 
             switch ($mnc) {
@@ -175,6 +145,63 @@ class ImportBaseStationsCommand extends Command
         fclose($file);
 
         return $index;
+    }
+
+    /**
+     * Get data from line
+     *
+     * @param $line
+     * @return array
+     */
+    private function lineData($line)
+    {
+        // replace tab
+        $lineStr  = str_replace("\t", "*****", $line);
+        // explode string to array
+        $lineData = explode('*****', $lineStr);
+
+        // $data = [
+        //     0  => "460",         // mcc 所有的都是460,表示中国
+        //     1  => "0",           // mnc 0表示移动基站,1表示联通基站,
+        //                          // 11表示电信LTE基站10000-20000表示电信CDMA基站，此时此字段的取值并非MNC，实际为电信SID
+        //     2  => "33061",       // lac 电信为nid
+        //     3  => "13256",       // cell id 电信为bid
+        //     4  => "30.573833",   // lat
+        //     5  => "104.292610",  // lon
+        //     6  => "175",         // acc 覆盖范围米
+        //     7  => "20171030",    // date
+        //     8  => "0.66",        // 精度   （正常无此字段）
+        //     9  => "四川省成都市龙泉驿区龙泉街道百工堰村;枇杷沟路与公园路路口南812米",  // addr
+        //     10 => "四川省",       // province
+        //     11 => "成都市",       // city
+        //     12 => "龙泉驿区",     // district
+        //     13 => "龙泉街道",     // township
+        // ];
+
+        // remove index of 8 if count is 14, sometimes this field is not exists
+        if (count($lineData) == 14) {
+            unset($lineData[8]);
+        }
+
+        return array_values($lineData);
+    }
+
+    /**
+     * Validate data in line
+     *
+     * @param $lineData
+     * @param $index
+     * @return bool
+     */
+    private function validate($lineData, &$index)
+    {
+        // validation
+        if (count($lineData) != 13 || 460 != $lineData[0]) {
+            echo $this->echo(sprintf("Invalid, line index: %s.\n", ++$index));
+            return false;
+        }
+
+        return true;
     }
 
     private function echo($str)
