@@ -33,7 +33,7 @@ class ImportBaseStationsCommand extends Command
      */
     public function handle()
     {
-        echo "Try to import base stations.\n";
+        echo sprintf("Try to import base stations %s.\n", Carbon::now()->toDateTimeString());
 
         $file = ($this->hasOption('file') ? $this->option('file') : null) ?: 'base_stations.csv';
         $file = storage_path('source/' . $file);
@@ -45,7 +45,7 @@ class ImportBaseStationsCommand extends Command
 
         $total = $this->import($file);
 
-        echo sprintf("Finished import %s records of base stations.\n", $total);
+        echo sprintf("Finished import %s records of base stations %s.\n", $total, Carbon::now()->toDateTimeString());
     }
 
     public function import($file)
