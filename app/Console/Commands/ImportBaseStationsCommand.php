@@ -6,6 +6,7 @@ use GL\Models\BaseStation\ChinaTelecom;
 use GL\Models\BaseStation\ChinaUnicom;
 use GL\Support\Helpers\Carbon as CarbonHelper;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Input\InputOption;
 
 class ImportBaseStationsCommand extends Command
@@ -52,6 +53,7 @@ class ImportBaseStationsCommand extends Command
 
         $file = fopen($file,'r');
 
+        $pendingCommit = 0;
         // get one line
         while ($data = fgetcsv($file)) {
             // replace tab
@@ -103,10 +105,16 @@ class ImportBaseStationsCommand extends Command
                         break;
                     }
 
+                    if ($pendingCommit == 0) {
+                        DB::beginTransaction();
+                    }
+
                     ChinaMobile::shape($lac, $cellId, $lat, $lon, $radius,
                                        $province, $city, $district, $township,
                                        $address, $dateRefreshAt);
                     $this->echo(sprintf("China mobile, line index: %s.\n", ++$index));
+
+                    $pendingCommit++;
                     break;
                 case 1:
                     if (ChinaUnicom::findBy($lac, $cellId)) {
@@ -114,10 +122,16 @@ class ImportBaseStationsCommand extends Command
                         break;
                     }
 
+                    if ($pendingCommit == 0) {
+                        DB::beginTransaction();
+                    }
+
                     ChinaUnicom::shape($lac, $cellId, $lat, $lon, $radius,
                                        $province, $city, $district, $township,
                                        $address, $dateRefreshAt);
                     $this->echo(sprintf("China unicom, line index: %s.\n", ++$index));
+
+                    $pendingCommit++;
                     break;
                 default:
                     if (ChinaTelecom::findBy($mnc, $lac, $cellId)) {
@@ -125,12 +139,27 @@ class ImportBaseStationsCommand extends Command
                         break;
                     }
 
+                    if ($pendingCommit == 0) {
+                        DB::beginTransaction();
+                    }
+
                     ChinaTelecom::shape($mnc, $lac, $cellId, $lat, $lon, $radius,
                                         $province, $city, $district, $township,
                                         $address, $dateRefreshAt);
                     $this->echo(sprintf("China telecom, line index: %s.\n", ++$index));
+
+                    $pendingCommit++;
                     break;
             }
+
+            if ($pendingCommit % 10000 == 0) {
+                DB::commit();
+                $pendingCommit = 0;
+            }
+        }
+
+        if ($pendingCommit > 0) {
+            DB::commit();
         }
 
         fclose($file);
