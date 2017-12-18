@@ -101,7 +101,7 @@ class ImportBaseStationsCommand extends Command
             switch ($mnc) {
                 case 0:
                     if (ChinaMobile::findBy($lac, $cellId)) {
-                        $this->echo(sprintf("Exists, china mobile, line index: %s.\n", ++$index));
+                        // $this->echo(sprintf("Exists, china mobile, line index: %s.\n", ++$index));
                         break;
                     }
 
@@ -112,13 +112,13 @@ class ImportBaseStationsCommand extends Command
                     ChinaMobile::shape($lac, $cellId, $lat, $lon, $radius,
                                        $province, $city, $district, $township,
                                        $address, $dateRefreshAt);
-                    $this->echo(sprintf("China mobile, line index: %s.\n", ++$index));
+                    // $this->echo(sprintf("China mobile, line index: %s.\n", ++$index));
 
                     $pendingCommit++;
                     break;
                 case 1:
                     if (ChinaUnicom::findBy($lac, $cellId)) {
-                        $this->echo(sprintf("Exists, china unicom, line index: %s.\n", ++$index));
+                        // $this->echo(sprintf("Exists, china unicom, line index: %s.\n", ++$index));
                         break;
                     }
 
@@ -129,13 +129,13 @@ class ImportBaseStationsCommand extends Command
                     ChinaUnicom::shape($lac, $cellId, $lat, $lon, $radius,
                                        $province, $city, $district, $township,
                                        $address, $dateRefreshAt);
-                    $this->echo(sprintf("China unicom, line index: %s.\n", ++$index));
+                    // $this->echo(sprintf("China unicom, line index: %s.\n", ++$index));
 
                     $pendingCommit++;
                     break;
                 default:
                     if (ChinaTelecom::findBy($mnc, $lac, $cellId)) {
-                        $this->echo(sprintf("Exists, china telecom, line index: %s.\n", ++$index));
+                        // $this->echo(sprintf("Exists, china telecom, line index: %s.\n", ++$index));
                         break;
                     }
 
@@ -146,7 +146,7 @@ class ImportBaseStationsCommand extends Command
                     ChinaTelecom::shape($mnc, $lac, $cellId, $lat, $lon, $radius,
                                         $province, $city, $district, $township,
                                         $address, $dateRefreshAt);
-                    $this->echo(sprintf("China telecom, line index: %s.\n", ++$index));
+                    // $this->echo(sprintf("China telecom, line index: %s.\n", ++$index));
 
                     $pendingCommit++;
                     break;
@@ -154,12 +154,14 @@ class ImportBaseStationsCommand extends Command
 
             if ($pendingCommit % 10000 == 0) {
                 DB::commit();
+                $this->echo(sprintf("Base station, line index: %s.\n", ++$index));
                 $pendingCommit = 0;
             }
         }
 
         if ($pendingCommit > 0) {
             DB::commit();
+            $this->echo(sprintf("Base station last, line index: %s.\n", $index));
         }
 
         fclose($file);
