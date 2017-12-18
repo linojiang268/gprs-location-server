@@ -100,10 +100,10 @@ class ImportBaseStationsCommand extends Command
 
             switch ($mnc) {
                 case 0:
-                    if (ChinaMobile::findBy($lac, $cellId)) {
-                        // $this->echo(sprintf("Exists, china mobile, line index: %s.\n", ++$index));
-                        break;
-                    }
+//                    if (ChinaMobile::findBy($lac, $cellId)) {
+//                        // $this->echo(sprintf("Exists, china mobile, line index: %s.\n", ++$index));
+//                        break;
+//                    }
 
                     if ($pendingCommit == 0) {
                         DB::beginTransaction();
@@ -117,10 +117,10 @@ class ImportBaseStationsCommand extends Command
                     $pendingCommit++;
                     break;
                 case 1:
-                    if (ChinaUnicom::findBy($lac, $cellId)) {
-                        // $this->echo(sprintf("Exists, china unicom, line index: %s.\n", ++$index));
-                        break;
-                    }
+//                    if (ChinaUnicom::findBy($lac, $cellId)) {
+//                        // $this->echo(sprintf("Exists, china unicom, line index: %s.\n", ++$index));
+//                        break;
+//                    }
 
                     if ($pendingCommit == 0) {
                         DB::beginTransaction();
@@ -134,10 +134,10 @@ class ImportBaseStationsCommand extends Command
                     $pendingCommit++;
                     break;
                 default:
-                    if (ChinaTelecom::findBy($mnc, $lac, $cellId)) {
-                        // $this->echo(sprintf("Exists, china telecom, line index: %s.\n", ++$index));
-                        break;
-                    }
+//                    if (ChinaTelecom::findBy($mnc, $lac, $cellId)) {
+//                        // $this->echo(sprintf("Exists, china telecom, line index: %s.\n", ++$index));
+//                        break;
+//                    }
 
                     if ($pendingCommit == 0) {
                         DB::beginTransaction();
