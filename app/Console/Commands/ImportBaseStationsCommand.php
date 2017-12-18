@@ -158,6 +158,10 @@ class ImportBaseStationsCommand extends Command
                 $this->echo(sprintf("Base station, line index: %s, %s.\n", ++$index, Carbon::now()->toDateTimeString()));
                 $pendingCommit = 0;
             }
+
+            if ($pendingCommit % 10000 == 0) {
+                $this->echo(sprintf("%s %s", $index, Carbon::now()->toDateTimeString()));
+            }
         }
 
         if ($pendingCommit > 0) {
