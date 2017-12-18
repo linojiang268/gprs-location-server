@@ -153,7 +153,7 @@ class ImportBaseStationsCommand extends Command
                     break;
             }
 
-            if ($pendingCommit % 100000 == 0) {
+            if ($pendingCommit % 1000000 == 0) {
                 DB::commit();
                 $this->echo(sprintf("Base station, line index: %s, %s.\n", ++$index, Carbon::now()->toDateTimeString()));
                 $pendingCommit = 0;
