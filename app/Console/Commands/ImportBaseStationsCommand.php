@@ -4,6 +4,7 @@ namespace GL\Console\Commands;
 use GL\Models\BaseStation\ChinaMobile;
 use GL\Models\BaseStation\ChinaTelecom;
 use GL\Models\BaseStation\ChinaUnicom;
+use GL\Support\Helpers\Carbon as CarbonHelper;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputOption;
 
@@ -68,7 +69,7 @@ class ImportBaseStationsCommand extends Command
             //     5  => "104.292610",  // lon
             //     6  => "175",         // acc 覆盖范围米
             //     7  => "20171030",    // date
-            //     8  => "0.66",        // 精度
+            //     8  => "0.66",        // 精度   （正常无此字段）
             //     9  => "四川省成都市龙泉驿区龙泉街道百工堰村;枇杷沟路与公园路路口南812米",  // addr
             //     10 => "四川省",       // province
             //     11 => "成都市",       // city
@@ -76,41 +77,57 @@ class ImportBaseStationsCommand extends Command
             //     13 => "龙泉街道",     // township
             // ];
 
-            if (count($lineData) != 14 || 460 != $lineData[0]) {
+            // remove index of 8 if count is 14, sometimes this field is not exists
+            if (count($lineData) == 14) {
+                unset($lineData[8]);
+                $lineData = array_values($lineData);
+            }
+
+            // validation
+            if (count($lineData) != 13 || 460 != $lineData[0]) {
                 echo $this->echo(sprintf("Invalid, line index: %s.\n", ++$index));
                 break;
             }
 
-            // var_dump($lineData);
-            switch ($lineData[1]) {
+            list($mcc, $mnc, $lac, $cellId,
+                 $lat, $lon, $radius, $dateRefreshAt,
+                 $address, $province, $city, $district, $township)
+                 = $lineData;
+
+            $dateRefreshAt = CarbonHelper::create($dateRefreshAt);
+
+            switch ($mnc) {
                 case 0:
-                    if (ChinaMobile::findBy($lineData[2], $lineData[3])) {
+                    if (ChinaMobile::findBy($lac, $cellId)) {
                         $this->echo(sprintf("Exists, china mobile, line index: %s.\n", ++$index));
                         break;
                     }
 
-                    ChinaMobile::shape($lineData[2], $lineData[3], $lineData[4], $lineData[5], $lineData[6],
-                                 $lineData[10], $lineData[11], $lineData[12], $lineData[13], $lineData[9]);
+                    ChinaMobile::shape($lac, $cellId, $lat, $lon, $radius,
+                                       $province, $city, $district, $township,
+                                       $address, $dateRefreshAt);
                     $this->echo(sprintf("China mobile, line index: %s.\n", ++$index));
                     break;
                 case 1:
-                    if (ChinaUnicom::findBy($lineData[2], $lineData[3])) {
+                    if (ChinaUnicom::findBy($lac, $cellId)) {
                         $this->echo(sprintf("Exists, china unicom, line index: %s.\n", ++$index));
                         break;
                     }
 
-                    ChinaUnicom::shape($lineData[2], $lineData[3], $lineData[4], $lineData[5], $lineData[6],
-                                       $lineData[10], $lineData[11], $lineData[12], $lineData[13], $lineData[9]);
+                    ChinaUnicom::shape($lac, $cellId, $lat, $lon, $radius,
+                                       $province, $city, $district, $township,
+                                       $address, $dateRefreshAt);
                     $this->echo(sprintf("China unicom, line index: %s.\n", ++$index));
                     break;
                 default:
-                    if (ChinaTelecom::findBy($lineData[1], $lineData[2], $lineData[3])) {
+                    if (ChinaTelecom::findBy($mnc, $lac, $cellId)) {
                         $this->echo(sprintf("Exists, china telecom, line index: %s.\n", ++$index));
                         break;
                     }
 
-                    ChinaTelecom::shape($lineData[1], $lineData[2], $lineData[3], $lineData[4], $lineData[5], $lineData[6],
-                                        $lineData[10], $lineData[11], $lineData[12], $lineData[13], $lineData[9]);
+                    ChinaTelecom::shape($mnc, $lac, $cellId, $lat, $lon, $radius,
+                                        $province, $city, $district, $township,
+                                        $address, $dateRefreshAt);
                     $this->echo(sprintf("China telecom, line index: %s.\n", ++$index));
                     break;
             }
