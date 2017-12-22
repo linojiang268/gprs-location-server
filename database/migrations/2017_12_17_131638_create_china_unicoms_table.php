@@ -15,7 +15,7 @@ class CreateChinaUnicomsTable extends Migration
     {
         Schema::create('china_unicoms', function (Blueprint $table) {
             $table->uuid('id');
-            $table->bigInteger('key');
+            $table->string('key');
             $table->bigInteger('lac');
             $table->bigInteger('cell_id');
             $table->double('lat');

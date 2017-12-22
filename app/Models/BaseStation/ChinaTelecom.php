@@ -175,6 +175,18 @@ class ChinaTelecom extends UuidModel
 
     public static function findByKeys(array $keys)
     {
-        return self::whereIn('key', $keys)->get()->all();
+        $keysWithLocations = array_fill_keys($keys, null);
+
+        $baseStations = self::whereIn('key', $keys)->get()->all();
+
+        /** @var static $baseStation */
+        foreach ($baseStations as $baseStation) {
+            $keysWithLocations[$baseStation->key] = [
+                'lat' => $baseStation->lat,
+                'lon' => $baseStation->lon,
+            ];
+        }
+
+        return $keysWithLocations;
     }
 }

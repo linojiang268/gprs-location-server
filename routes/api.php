@@ -11,4 +11,5 @@
 |
 */
 
-Route::get('api/base_station/location', 'BaseStation\BaseStationController@location');
+Route::get('api/base_station/location', 'BaseStation\BaseStationController@locationByBaseStation');
+Route::get('api/base_stations/location', 'BaseStation\BaseStationController@locationByBaseStations');

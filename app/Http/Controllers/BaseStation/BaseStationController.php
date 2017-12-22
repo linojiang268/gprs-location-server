@@ -21,7 +21,7 @@ class BaseStationController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Exception
      */
-    public function location(Request $request)
+    public function locationByBaseStation(Request $request)
     {
         $this->validate($request, [
             'mnc'     => 'required|integer|in:0,1,2',                     // 设备类型
@@ -74,6 +74,14 @@ class BaseStationController extends Controller
         ]);
     }
 
+    /**
+     * Get location by base stations
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws NotExistsBaseStationException
+     * @throws \Exception
+     */
     public function locationByBaseStations(Request $request)
     {
         $this->validate($request, [
@@ -81,6 +89,7 @@ class BaseStationController extends Controller
             'multi' => 'required|json',                                 // 多个
         ]);
 
+        // Valid
         $mnc   = intval($request->input('mnc'));
         $multi = json_decode($request->input('multi'), true);
         if (!is_array($multi) || empty($multi)) {
@@ -91,51 +100,67 @@ class BaseStationController extends Controller
             return $this->jsonException('too many multi.');
         }
 
-        $keys = [];
+        $keysWithRxLevels = [];
         foreach ($multi as $item) {
             if ($mnc === 0 || $mnc === 1) {
                 $this->validateData($item, [
-                    'lac'     => 'required|integer',   // 移动、联通小区号
-                    'cell_id' => 'required|integer',   // 移动、联通基站号
-                ]);
-                array_push($keys, sprintf('%s-%s', $item['lac'], $item['cell_id']));
+                    'lac'      => 'required|integer',   // 移动、联通小区号
+                    'cell_id'  => 'required|integer',   // 移动、联通基站号
+                    'rx_level' => 'required|integer',   // 信号强度
+                ], []);
+                $keysWithRxLevels[sprintf('%s-%s', $item['lac'], $item['cell_id'])] = $item['rx_level'];
             } else {
                 $this->validateData($item, [
-                    'sid' => 'required|integer',        // 电信SID系统识别码（各地区1个）
-                    'nid' => 'required|integer',        // 电信NID网络识别码（各地区1-3个）
-                    'bid' => 'required|integer',        // 电信基站号
-                ]);
-                array_push($keys, sprintf('%s-%s-%s', $item['sid'], $item['nid'], $item['bid']));
+                    'sid'      => 'required|integer',   // 电信SID系统识别码（各地区1个）
+                    'nid'      => 'required|integer',   // 电信NID网络识别码（各地区1-3个）
+                    'bid'      => 'required|integer',   // 电信基站号
+                    'rx_level' => 'required|integer',   // 信号强度
+                ], []);
+                $keysWithRxLevels[sprintf('%s-%s-%s', $item['sid'], $item['nid'], $item['bid'])] = $item['rx_level'];
             }
         }
 
+        // query
         switch ($mnc) {
             case 0:
-                $baseStations = ChinaMobile::findByKeys($keys);
+                $keysWithLocations = ChinaMobile::findByKeys(array_keys($keysWithRxLevels));
                 break;
             case 1:
-                $baseStations = ChinaUnicom::findByKeys($keys);
+                $keysWithLocations = ChinaUnicom::findByKeys(array_keys($keysWithRxLevels));
                 break;
             case 2:
-                $baseStations = ChinaTelecom::findByKeys($keys);
+                $keysWithLocations = ChinaTelecom::findByKeys(array_keys($keysWithRxLevels));
                 break;
             default:
                 throw new \Exception('invalid mnc.');
         }
 
+        // results
+        $multiPoints = [];
+        foreach ($keysWithLocations as $key => $keysWithLocation) {
+            if (is_null($keysWithLocation)) {
+                // 此基站没有结果
+                continue;
+            }
 
+            $lat = $keysWithLocation['lat'];
+            $lon = $keysWithLocation['lon'];
+            array_push($multiPoints, sprintf('%s %s %s', $lat, $lon, $keysWithRxLevels[$key]));
+        }
 
-//        //$result = position_analysis("30.24563 103.2098 -30 30.14363 103.4057 -50 30.4284 103.3087 -20 30.5203 103.6934 -40 30.9372 103.0837 -70 30.73463 103.643 -20");
-//        //if(strcmp($type, 'so')) {
-//        if('so' == $type) {
-//            $result = position_analysis($data);
-//            //} else if (strcmp($type, 'bin')) {
-//        } else if ('bin' == $type) {
-//            $result = exec("./Uploads/PositionAnalyser $data");
-//        }
+        if (empty($multiPoints)) {
+            throw new NotExistsBaseStationException();
+        }
 
+        if ('testing' == env('APP_ENV')) {
+            return $this->json(['lat' => 0, 'lon' => 0]);
+        }
 
+        $rst = position_analysis(implode(' ', $multiPoints));
+        if (is_null($rst)) {
+            throw new NotExistsBaseStationException();
+        }
 
-
+        return $this->json($rst);
     }
 }

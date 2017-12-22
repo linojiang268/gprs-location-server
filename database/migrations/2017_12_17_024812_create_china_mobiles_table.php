@@ -15,7 +15,7 @@ class CreateChinaMobilesTable extends Migration
     {
         Schema::create('china_mobiles', function (Blueprint $table) {
             $table->uuid('id');
-            $table->bigInteger('key');
+            $table->string('key');
             $table->bigInteger('lac');
             $table->bigInteger('cell_id');
             $table->double('lat');

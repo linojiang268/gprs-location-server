@@ -48,10 +48,10 @@ trait Validation
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function validateWithBag($errorBag, array $data, array $rules, string $group, string $segment, array $customAttributes = [])
+    public function validateDataWithBag($errorBag, array $data, array $rules, string $group, string $segment, array $customAttributes = [])
     {
         $this->withErrorBag($errorBag, function () use ($data, $rules, $group, $segment, $customAttributes) {
-            $this->validate($data, $rules, $group, $segment, $customAttributes);
+            $this->validateData($data, $rules, $group, $segment, $customAttributes);
         });
     }
 

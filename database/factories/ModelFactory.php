@@ -15,9 +15,12 @@
 //                        China Mobile
 //================================================================
 $factory->define(\GL\Models\BaseStation\ChinaMobile::class, function (Faker\Generator $faker) {
+    $lac    = random_int(1, 10000);
+    $cellId = random_int(1, 10000);
     return [
-        'lac'             => random_int(1, 10000),
-        'cell_id'         => random_int(1, 10000),
+        'key'             => sprintf('%s-%s', $lac, $cellId),
+        'lac'             => $lac,
+        'cell_id'         => $cellId,
         'lat'             => 30.85,
         'lon'             => 106.78,
         'radius'          => 120,
@@ -36,9 +39,12 @@ $factory->define(\GL\Models\BaseStation\ChinaMobile::class, function (Faker\Gene
 //                        China Unicom
 //================================================================
 $factory->define(\GL\Models\BaseStation\ChinaUnicom::class, function (Faker\Generator $faker) {
+    $lac    = random_int(1, 10000);
+    $cellId = random_int(1, 10000);
     return [
-        'lac'             => random_int(1, 10000),
-        'cell_id'         => random_int(1, 10000),
+        'key'             => sprintf('%s-%s', $lac, $cellId),
+        'lac'             => $lac,
+        'cell_id'         => $cellId,
         'lat'             => 30.85,
         'lon'             => 106.78,
         'radius'          => 120,
@@ -57,10 +63,14 @@ $factory->define(\GL\Models\BaseStation\ChinaUnicom::class, function (Faker\Gene
 //                        China Telecom
 //================================================================
 $factory->define(\GL\Models\BaseStation\ChinaTelecom::class, function (Faker\Generator $faker) {
+    $sid = random_int(1, 10000);
+    $nid = random_int(1, 10000);
+    $bid = random_int(1, 10000);
     return [
-        'sid'             => random_int(1, 10000),
-        'nid'             => random_int(1, 10000),
-        'bid'             => random_int(1, 10000),
+        'key'             => sprintf('%s-%s-%s', $sid, $nid, $bid),
+        'sid'             => $sid,
+        'nid'             => $nid,
+        'bid'             => $bid,
         'lat'             => 30.85,
         'lon'             => 106.78,
         'radius'          => 120,
