@@ -22,7 +22,7 @@ trait Validation
      * @param string|array $messages
      * @param array  $customAttributes
      */
-    public function validate(array $data, array $rules, $messages = null, array $customAttributes = [])
+    public function validateData(array $data, array $rules, $messages = null, array $customAttributes = [])
     {
         // for back-compatible
         if (is_string($messages)) {

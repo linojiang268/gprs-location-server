@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Base station of china unicom
  *
+ * @property string $key
  * @property int $lac
  * @property int $cellId
  * @property double $lat
@@ -52,7 +53,7 @@ class ChinaUnicom extends UuidModel
      * @inheritdoc
      */
     protected $fillable = [
-        'lac', 'cell_id', 'lat', 'lon', 'radius',
+        'key', 'lac', 'cell_id', 'lat', 'lon', 'radius',
         'more_info',
         'more_info->province', 'more_info->city',
         'more_info->district', 'more_info->township',
@@ -100,6 +101,7 @@ class ChinaUnicom extends UuidModel
                                  string $address = null, Carbon $dataRefreshAt = null)
     {
         $chinaMobile = new static();
+        $chinaMobile->key           = $lac . '-' . $cellId;
         $chinaMobile->lac           = $lac;
         $chinaMobile->cellId        = $cellId;
         $chinaMobile->lat           = $lat;
@@ -160,5 +162,10 @@ class ChinaUnicom extends UuidModel
     public static function findBy(int $lac, int $cellId)
     {
         return self::ofLac($lac)->ofCellId($cellId)->first();
+    }
+
+    public static function findByKeys(array $keys)
+    {
+        return self::whereIn('key', $keys)->get()->all();
     }
 }

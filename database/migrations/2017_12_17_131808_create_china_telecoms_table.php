@@ -15,6 +15,7 @@ class CreateChinaTelecomsTable extends Migration
     {
         Schema::create('china_telecoms', function (Blueprint $table) {
             $table->uuid('id');
+            $table->bigInteger('key');
             $table->bigInteger('sid');
             $table->bigInteger('nid');
             $table->bigInteger('bid');
@@ -26,7 +27,7 @@ class CreateChinaTelecomsTable extends Migration
 
             $table->timestamps();
             $table->softDeletes();
-            $table->index(['sid', 'nid', 'bid']);
+            $table->index(['key', 'sid', 'nid', 'bid']);
         });
     }
 

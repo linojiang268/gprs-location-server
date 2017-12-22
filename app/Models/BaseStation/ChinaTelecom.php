@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 /**
  * Base station of china telecom
  *
+ * @property string $key
  * @property int $sid
  * @property int $nid
  * @property int $bid
@@ -53,7 +54,7 @@ class ChinaTelecom extends UuidModel
      * @inheritdoc
      */
     protected $fillable = [
-        'sid', 'nid', 'bid', 'lat', 'lon', 'radius',
+        'key', 'sid', 'nid', 'bid', 'lat', 'lon', 'radius',
         'more_info',
         'more_info->province', 'more_info->city',
         'more_info->district', 'more_info->township',
@@ -107,6 +108,7 @@ class ChinaTelecom extends UuidModel
                                  string $address = null, Carbon $dataRefreshAt = null)
     {
         $chinaMobile = new static();
+        $chinaMobile->key           = $sid . '-' . $nid . '-' . $bid;
         $chinaMobile->sid           = $sid;
         $chinaMobile->nid           = $nid;
         $chinaMobile->bid           = $bid;
@@ -169,5 +171,10 @@ class ChinaTelecom extends UuidModel
     public static function findBy(int $sid, int $nid, int $bid)
     {
         return self::ofSid($sid)->ofNid($nid)->ofBid($bid)->first();
+    }
+
+    public static function findByKeys(array $keys)
+    {
+        return self::whereIn('key', $keys)->get()->all();
     }
 }
