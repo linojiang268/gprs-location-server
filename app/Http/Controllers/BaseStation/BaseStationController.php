@@ -152,15 +152,17 @@ class BaseStationController extends Controller
             throw new NotExistsBaseStationException();
         }
 
-        if ('testing' == env('APP_ENV')) {
-            return $this->json(['lat' => 0, 'lon' => 0]);
-        }
-
-        $rst = position_analysis(implode(' ', $multiPoints));
-        if (is_null($rst)) {
+        $rst = ('testing' == env('APP_ENV')) ? " 32.073867 108.036614" // debug data
+                                                  : position_analysis(implode(' ', $multiPoints));
+        if (empty($rst)) {
             throw new NotExistsBaseStationException();
         }
 
-        return $this->json($rst);
+        list($lat, $lon) = explode(' ', trim($rst));
+
+        return $this->json([
+            'lat' => doubleval($lat),
+            'lon' => doubleval($lon),
+        ]);
     }
 }

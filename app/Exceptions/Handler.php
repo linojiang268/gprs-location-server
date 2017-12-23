@@ -73,6 +73,6 @@ class Handler extends ExceptionHandler
             return $this->jsonException($ex->errors() ? array_first($ex->errors())[0] : $ex->getMessage(), ExceptionCode::INVALID_PARAMS);
         }
 
-        return $this->jsonException($ex->getTrace(), ($ex->getCode() && is_int($ex->getCode())) ? $ex->getCode() : ExceptionCode::GENERAL);
+        return $this->jsonException($ex->getMessage(), ($ex->getCode() && is_int($ex->getCode())) ? $ex->getCode() : ExceptionCode::GENERAL);
     }
 }

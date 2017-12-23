@@ -84,9 +84,7 @@ class BaseStationControllerTest extends TestCase
         $response->assertSuccessful();
         $data = json_decode($response->getContent(), true);
         $this->assertEquals(0, $data['status']);
-        $this->assertEquals(0, $data['lat']);
-        $this->assertEquals(0, $data['lon']);
-        // $this->assertEquals($chinaMobile->radius, $data['radius']);
-        // $this->assertEquals($chinaMobile->address, $data['address']);
+        $this->assertEquals(32.073867, $data['lat']);
+        $this->assertEquals(108.036614, $data['lon']);
     }
 }
