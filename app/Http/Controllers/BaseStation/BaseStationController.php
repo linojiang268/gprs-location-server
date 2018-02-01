@@ -4,6 +4,7 @@ namespace GL\Http\Controllers\BaseStation;
 
 use GL\Exceptions\NotExistsBaseStationException;
 use GL\Http\Controllers\Controller;
+use GL\Models\BaseStation\BaseStation;
 use GL\Models\BaseStation\ChinaMobile;
 use GL\Models\BaseStation\ChinaTelecom;
 use GL\Models\BaseStation\ChinaUnicom;
@@ -163,6 +164,86 @@ class BaseStationController extends Controller
         return $this->json([
             'lat' => doubleval($lat),
             'lon' => doubleval($lon),
+        ]);
+    }
+
+    /**
+     * Get location by base stations
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws NotExistsBaseStationException
+     * @throws \Exception
+     */
+    public function locations(Request $request)
+    {
+        $this->validate($request, [
+            'mnc'   => 'required|integer|in:0,1,2',                     // 设备类型
+            'multi' => 'required|json',                                 // 多个
+        ]);
+
+        // Valid
+        $mnc   = intval($request->input('mnc'));
+        $multi = json_decode($request->input('multi'), true);
+        if (!is_array($multi) || empty($multi)) {
+            return $this->jsonException('no multi.');
+        }
+
+        if (count($multi) > 8) {
+            return $this->jsonException('too many multi.');
+        }
+
+        $idsWithRxLevels = [];
+        foreach ($multi as $item) {
+            if ($mnc === 0 || $mnc === 1) {
+                $this->validateData($item, [
+                    'lac'      => 'required|integer',   // 移动、联通小区号
+                    'cid'      => 'required|integer',   // 移动、联通基站号
+                    'rx_level' => 'required|integer',   // 信号强度
+                ], []);
+                $idsWithRxLevels[sprintf('%s-%s-%s', $mnc, $item['lac'], $item['cid'])] = $item['rx_level'];
+            } else {
+                $this->validateData($item, [
+                    'sid'      => 'required|integer',   // 电信SID系统识别码（各地区1个）
+                    'nid'      => 'required|integer',   // 电信NID网络识别码（各地区1-3个）
+                    'bid'      => 'required|integer',   // 电信基站号
+                    'rx_level' => 'required|integer',   // 信号强度
+                ], []);
+                $idsWithRxLevels[sprintf('%s-%s-%s', $item['sid'], $item['nid'], $item['bid'])] = $item['rx_level'];
+            }
+        }
+
+        // query
+        $idsWithLocations = BaseStation::findByIds(array_keys($idsWithRxLevels));
+
+        // results
+        $multiPoints = [];
+        foreach ($idsWithLocations as $id => $idsWithLocation) {
+            if (is_null($idsWithLocation)) {
+                // 此基站没有结果
+                continue;
+            }
+
+            $lat = $idsWithLocation['lat'];
+            $lng = $idsWithLocation['lng'];
+            array_push($multiPoints, sprintf('%s %s %s', $lat, $lng, $idsWithRxLevels[$id]));
+        }
+
+        if (empty($multiPoints)) {
+            throw new NotExistsBaseStationException();
+        }
+
+        $rst = ('testing' == env('APP_ENV')) ? " 32.073867 108.036614" // debug data
+            : position_analysis(implode(' ', $multiPoints));
+        if (empty($rst)) {
+            throw new NotExistsBaseStationException();
+        }
+
+        list($lat, $lng) = explode(' ', trim($rst));
+
+        return $this->json([
+            'lat' => doubleval($lat),
+            'lng' => doubleval($lng),
         ]);
     }
 }

@@ -3,6 +3,7 @@
 namespace Tests\GL\Http\Controllers\Home;
 
 use GL\Exceptions\ExceptionCode;
+use GL\Models\BaseStation\BaseStation;
 use GL\Models\BaseStation\ChinaMobile;
 use GL\Models\BaseStation\ChinaTelecom;
 use GL\Models\BaseStation\ChinaUnicom;
@@ -86,5 +87,38 @@ class BaseStationControllerTest extends TestCase
         $this->assertEquals(0, $data['status']);
         $this->assertEquals(32.073867, $data['lat']);
         $this->assertEquals(108.036614, $data['lon']);
+    }
+
+    //=========================================
+    //               Locations
+    //=========================================
+    public function testLocations()
+    {
+        $baseStations = [
+            factory(BaseStation::class)->create([
+                'id'  => '0-1-1',
+                'lat' => 32.073867,
+                'lng' => 108.036614,
+            ]),
+            factory(BaseStation::class)->create([
+                'id'  => '0-2-2',
+                'lat' => 32.073867,
+                'lng' => 108.036614,
+            ]),
+            factory(BaseStation::class)->create([
+                'id'  => '0-3-3',
+                'lat' => 32.073867,
+                'lng' => 108.036614,
+            ]),
+        ];
+        $response = $this->getJson(sprintf('api/locations?mnc=%s&multi=%s', 0, json_encode([
+            ['lac' => 1, 'cid' => 1, 'rx_level' => -20],
+            ['lac' => 2, 'cid' => 2, 'rx_level' => -50],
+        ])));
+        $response->assertSuccessful();
+        $data = json_decode($response->getContent(), true);
+        $this->assertEquals(0, $data['status']);
+        $this->assertEquals(32.073867, $data['lat']);
+        $this->assertEquals(108.036614, $data['lng']);
     }
 }

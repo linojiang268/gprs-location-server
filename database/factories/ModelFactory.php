@@ -84,3 +84,20 @@ $factory->define(\GL\Models\BaseStation\ChinaTelecom::class, function (Faker\Gen
         'data_refresh_at' => \Carbon\Carbon::now()->subDays(20),
     ];
 });
+
+//================================================================
+//                       Base Station
+//================================================================
+$factory->define(\GL\Models\BaseStation\BaseStation::class, function (Faker\Generator $faker) {
+    $sid = random_int(1, 10000);
+    $nid = random_int(1, 10000);
+    $bid = random_int(1, 10000);
+    return [
+        'id'  => sprintf('%s-%s-%s', $sid, $nid, $bid),
+        'mnc' => $sid,
+        'lac' => $nid,
+        'cid' => $bid,
+        'lat' => 30.85,
+        'lng' => 106.78,
+    ];
+});
