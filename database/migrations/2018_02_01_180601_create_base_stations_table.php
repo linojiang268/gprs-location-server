@@ -14,7 +14,7 @@ class CreateBaseStationsTable extends Migration
     public function up()
     {
         Schema::create('base_stations', function (Blueprint $table) {
-            $table->string('id');
+            $table->string('id')->primary();
             $table->bigInteger('mnc');
             $table->bigInteger('lac');
             $table->bigInteger('cid');
